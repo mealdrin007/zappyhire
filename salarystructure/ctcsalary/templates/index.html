@@ -1,31 +1,78 @@
 {%extends 'base.html'%}
 {%block body_block%}
+{% load mathfilters %}
+<!--  <style>-->
+<!--        table {-->
+<!--            width: 300px;-->
+<!--        }-->
+<!--        table, th, td {-->
+<!--            border: solid 1px #DDD;-->
+<!--            border-collapse: collapse;-->
+<!--            padding: 2px 3px;-->
+<!--            text-align: center;-->
+<!--        }-->
+<!--    </style>-->
 <div class="container">
     <div class="row">
         <div class="col-4"></div>
         <div class="col-4">
-            <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+            <form action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
                 {% csrf_token %}
                 <input type="file"
                        title="Upload excel file"
                        name="excel_file"
-                       style="border: 1px solid black; padding: 5px;"
+                       class="form_control"
                        required="required">
-                    <input type="submit"
-                           value="Upload"
-                           class="btn btn-success">
+                <input type="submit"
+                       value="Upload"
+                       class="btn btn-success">
+                <br>
+                <input name="ctc" type="number" placeholder="CTC" class="form-control">
 
 
             </form>
             <hr>
-
-            {% for row in excel_data %}
-                {% for cell in row %}
-                    {{ cell }}&nbsp;&nbsp;
-                {% endfor %}<br>
+            <div id="tab">
+            <table class="table" >
+                <tr><th>Salary Components</th><th>Annual</th><th>Monthly</th></tr>
+            {% for key, value in excel_data.items %}
+                <tr><td>{{key}}:</td><td>{{value}}</td><td>{{value|div:12|floatformat:0}}</td></tr>
+<!--            {% for cell in row %}-->
+<!--            {{ cell }}&nbsp;&nbsp;-->
+<!--            {% endfor %}<br>-->
             {% endfor %}
+           </table>
+            </div>
+            <input type="button" value="Create PDF"
+            id="btPrint" onclick="createPDF()" />
         </div>
         <div class="col-4"></div>
     </div>
 </div>
+<script>
+    function createPDF() {
+        var sTable = document.getElementById('tab').innerHTML;
+
+        var style = "<style>";
+        style = style + "table {width: 100%;font: 17px Calibri;}";
+        style = style + "table, th, td {border: solid 1px #DDD; border-collapse: collapse;";
+        style = style + "padding: 2px 3px;text-align: center;}";
+        style = style + "</style>";
+
+        // CREATE A WINDOW OBJECT.
+        var win = window.open('', '', 'height=700,width=700');
+
+        win.document.write('<html><head>');
+        win.document.write('<title>salary</title>');   // <title> FOR PDF HEADER.
+        win.document.write(style);          // ADD STYLE INSIDE THE HEAD TAG.
+        win.document.write('</head>');
+        win.document.write('<body>');
+        win.document.write(sTable);         // THE TABLE CONTENTS INSIDE THE BODY TAG.
+        win.document.write('</body></html>');
+
+        win.document.close(); 	// CLOSE THE CURRENT WINDOW.
+
+        win.print();    // PRINT THE CONTENTS.
+    }
+</script>
 {%endblock%}
